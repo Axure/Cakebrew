@@ -19,6 +19,12 @@
 @property (strong, nonatomic) PXSourceListItem *leavesFormulaeSidebarItem;
 @property (strong, nonatomic) PXSourceListItem *repositoriesFormulaeSidebarItem;
 
+@property (strong, nonatomic) PXSourceListItem *instaledCasksSidebarItem;
+@property (strong, nonatomic) PXSourceListItem *outdatedCasksSidebarItem;
+@property (strong, nonatomic) PXSourceListItem *allCasksSidebarItem;
+
+@property BOOL hasCaskroom;
+
 @end
 
 @implementation BPSideBarController
@@ -38,40 +44,42 @@
 	_rootSidebarCategory = [PXSourceListItem itemWithTitle:@"" identifier:@"root"];
 	
 	parent = [PXSourceListItem itemWithTitle:NSLocalizedString(@"Sidebar_Group_Formulae", nil) identifier:@"group"];
-	[_rootSidebarCategory addChildItem:parent];  //FormulaeSideBarItemFormulaeCategory = 0,
+	[_rootSidebarCategory addChildItem:parent];
 	
 	_instaledFormulaeSidebarItem = [PXSourceListItem itemWithTitle:NSLocalizedString(@"Sidebar_Item_Installed", nil) identifier:@"item"];
 	_instaledFormulaeSidebarItem.icon = [NSImage imageNamed:@"installedTemplate"];
-	[parent addChildItem:_instaledFormulaeSidebarItem];  //FormulaeSideBarItemInstalled = 1,
+	[parent addChildItem:_instaledFormulaeSidebarItem];
 	
 	_outdatedFormulaeSidebarItem = [PXSourceListItem itemWithTitle:NSLocalizedString(@"Sidebar_Item_Outdated", nil) identifier:@"item"];
 	_outdatedFormulaeSidebarItem.icon = [NSImage imageNamed:@"outdatedTemplate"];
-	[parent addChildItem:_outdatedFormulaeSidebarItem]; //FormulaeSideBarItemOutdated = 2,
+	[parent addChildItem:_outdatedFormulaeSidebarItem];
 	
 	_allFormulaeSidebarItem = [PXSourceListItem itemWithTitle:NSLocalizedString(@"Sidebar_Item_All", nil) identifier:@"item"];
 	_allFormulaeSidebarItem.icon = [NSImage imageNamed:@"allFormulaeTemplate"];
-	[parent addChildItem:_allFormulaeSidebarItem];  //FormulaeSideBarItemAll = 3,
+	[parent addChildItem:_allFormulaeSidebarItem];
 	
 	_leavesFormulaeSidebarItem = [PXSourceListItem itemWithTitle:NSLocalizedString(@"Sidebar_Item_Leaves", nil) identifier:@"item"];
 	_leavesFormulaeSidebarItem.icon = [NSImage imageNamed:@"pinTemplate"];
-	[parent addChildItem:_leavesFormulaeSidebarItem];  //FormulaeSideBarItemLeaves = 4,
+	[parent addChildItem:_leavesFormulaeSidebarItem];
 	
 	_repositoriesFormulaeSidebarItem = [PXSourceListItem itemWithTitle:NSLocalizedString(@"Sidebar_Item_Repos", nil) identifier:@"item"];
 	_repositoriesFormulaeSidebarItem.icon = [NSImage imageNamed:@"cloudTemplate"];
-	[parent addChildItem:_repositoriesFormulaeSidebarItem];  //FormulaeSideBarItemRepositories = 5,
+	[parent addChildItem:_repositoriesFormulaeSidebarItem];
+	
+	
 	
 	parent = [PXSourceListItem itemWithTitle:NSLocalizedString(@"Sidebar_Group_Tools", nil) identifier:@"group"];
-	[_rootSidebarCategory addChildItem:parent];  //FormulaeSideBarItemToolsCategory = 6,
+	[_rootSidebarCategory addChildItem:parent];
 	
 	item = [PXSourceListItem itemWithTitle:NSLocalizedString(@"Sidebar_Item_Doctor", nil) identifier:@"item"];
 	[item setBadgeValue:@(-1)];
 	[item setIcon:[NSImage imageNamed:@"doctorTemplate"]];
-	[parent addChildItem:item];  //FormulaeSideBarItemDoctor = 7,
+	[parent addChildItem:item];
 	
 	item = [PXSourceListItem itemWithTitle:NSLocalizedString(@"Sidebar_Item_Update", nil) identifier:@"item"];
 	[item setBadgeValue:@(-1)];
 	[item setIcon:[NSImage imageNamed:@"updateTemplate"]];
-	[parent addChildItem:item];  //FormulaeSideBarItemUpdate = 8,
+	[parent addChildItem:item];
 }
 
 - (void)configureSidebarSettings
@@ -87,6 +95,28 @@
 	self.allFormulaeSidebarItem.badgeValue			= @([[[BPHomebrewManager sharedManager] formulae_all] count]);
 	self.leavesFormulaeSidebarItem.badgeValue		= @([[[BPHomebrewManager sharedManager] formulae_leaves] count]);
 	self.repositoriesFormulaeSidebarItem.badgeValue = @([[[BPHomebrewManager sharedManager] formulae_repositories] count]);
+}
+
+- (void)enableCaskItems
+{
+	self.hasCaskroom = YES;
+	
+	PXSourceListItem *parent;
+	
+	parent = [PXSourceListItem itemWithTitle:NSLocalizedString(@"Sidebar_Group_CaskRoom", nil) identifier:@"group"];
+	[_rootSidebarCategory insertChildItem:parent atIndex:1];
+	
+	_instaledCasksSidebarItem = [PXSourceListItem itemWithTitle:NSLocalizedString(@"Sidebar_Item_Installed", nil) identifier:@"item"];
+	_instaledCasksSidebarItem.icon = [NSImage imageNamed:@"installedTemplate"];
+	[parent addChildItem:_instaledCasksSidebarItem];
+	
+	_outdatedCasksSidebarItem = [PXSourceListItem itemWithTitle:NSLocalizedString(@"Sidebar_Item_Outdated", nil) identifier:@"item"];
+	_outdatedCasksSidebarItem.icon = [NSImage imageNamed:@"outdatedTemplate"];
+	[parent addChildItem:_outdatedCasksSidebarItem];
+	
+	_allCasksSidebarItem = [PXSourceListItem itemWithTitle:NSLocalizedString(@"Sidebar_Item_All_Casks", nil) identifier:@"item"];
+	_allCasksSidebarItem.icon = [NSImage imageNamed:@"allFormulaeTemplate"];
+	[parent addChildItem:_allCasksSidebarItem];
 }
 
 #pragma mark - PXSourceList Data Source

@@ -20,40 +20,14 @@
 //
 
 #import "BPHomebrewInterface.h"
+#import "BPHomebrewFormulaeListCall.h"
 
 static NSString *cakebrewOutputIdentifier = @"+++++Cakebrew+++++";
-
-@interface BPHomebrewInterfaceListCall : NSObject
-
-@property (strong, readonly) NSArray *arguments;
-
-- (instancetype)initWithArguments:(NSArray *)arguments;
-- (NSArray *)parseData:(NSString *)data;
-- (BPFormula *)parseFormulaItem:(NSString *)item;
-
-@end
-
-@interface BPHomebrewInterfaceListCallInstalled : BPHomebrewInterfaceListCall
-@end
-
-@interface BPHomebrewInterfaceListCallAll : BPHomebrewInterfaceListCall
-@end
-
-@interface BPHomebrewInterfaceListCallLeaves : BPHomebrewInterfaceListCall
-@end
-
-@interface BPHomebrewInterfaceListCallUpgradeable : BPHomebrewInterfaceListCall
-@end
-
-@interface BPHomebrewInterfaceListCallSearch : BPHomebrewInterfaceListCall
-@end
-
-@interface BPHomebrewInterfaceListCallRepositories: BPHomebrewInterfaceListCall
-@end
 
 @interface BPHomebrewInterface ()
 
 @property BOOL systemHasAppNap;
+@property (getter=isCaskroomInstalled) BOOL caskroomInstalled;
 
 @property (strong) NSString *path_cellar;
 @property (strong) NSString *path_shell;
@@ -114,6 +88,8 @@ static NSString *cakebrewOutputIdentifier = @"+++++Cakebrew+++++";
 	string_output = [self removeLoginShellOutputFromString:string_output];
 	
 	NSLog(@"`which brew` returned \"%@\"", string_output);
+	
+	[self checkForCaskroom];
 	
 	return string_output.length != 0;
 }
@@ -321,30 +297,29 @@ static NSString *cakebrewOutputIdentifier = @"+++++Cakebrew+++++";
 
 #pragma mark - Operations that return on finish
 
-- (NSArray*)listMode:(BPListMode)mode {
-	NSLog(@"Listing with mode: %ld", (long)mode);
-	
-	BPHomebrewInterfaceListCall *listCall = nil;
+- (NSArray*)listFormulaeMode:(BPListMode)mode
+{
+	BPHomebrewFormulaeListCall *listCall = nil;
 	
 	switch (mode) {
 		case kBPListInstalled:
-			listCall = [[BPHomebrewInterfaceListCallInstalled alloc] init];
+			listCall = [[BPHomebrewFormulaeListCallInstalled alloc] init];
 			break;
 			
 		case kBPListAll:
-			listCall = [[BPHomebrewInterfaceListCallAll alloc] init];
+			listCall = [[BPHomebrewFormulaeListCallAll alloc] init];
 			break;
 			
 		case kBPListLeaves:
-			listCall = [[BPHomebrewInterfaceListCallLeaves alloc] init];
+			listCall = [[BPHomebrewFormulaeListCallLeaves alloc] init];
 			break;
 			
 		case kBPListOutdated:
-			listCall = [[BPHomebrewInterfaceListCallUpgradeable alloc] init];
+			listCall = [[BPHomebrewFormulaeListCallOutdated alloc] init];
 			break;
 			
 		case kBPListRepositories:
-			listCall = [[BPHomebrewInterfaceListCallRepositories alloc] init];
+			listCall = [[BPHomebrewFormulaeListCallRepositories alloc] init];
 			break;
 			
 		default:
@@ -353,8 +328,6 @@ static NSString *cakebrewOutputIdentifier = @"+++++Cakebrew+++++";
 	
 	NSString *string = [self performBrewCommandWithArguments:listCall.arguments];
 	
-	NSLog(@"Finished list mode: %ld", (long)mode);
-	
 	if (string) {
 		return [listCall parseData:string];
 	} else {
@@ -362,9 +335,29 @@ static NSString *cakebrewOutputIdentifier = @"+++++Cakebrew+++++";
 	}
 }
 
+- (NSArray*)listCasksMode:(BPListMode)mode
+{
+	
+}
+
 - (NSString*)informationForFormula:(NSString*)formula
 {
 	return [self performBrewCommandWithArguments:@[@"info", formula]];
+}
+
+- (void)checkForCaskroom
+{
+	NSString *result = [[self performBrewCommandWithArguments:@[@"cask"] captureError:YES] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+	[self setCaskroomInstalled:[result hasPrefix:@"brew-cask"]];
+	
+	NSLog(@"Caskroom was %@ on this system!", self.isCaskroomInstalled ? @"detected" : @"NOT DETECTED");
+	
+	if ([self.delegate respondsToSelector:@selector(homebrewInterfaceDidUpdateCaskroomStatus)])
+	{
+		dispatch_async(dispatch_get_main_queue(), ^{
+			[self.delegate homebrewInterfaceDidUpdateCaskroomStatus];
+		});
+	}
 }
 
 - (NSString*)removeLoginShellOutputFromString:(NSString*)string {
@@ -443,128 +436,6 @@ static NSString *cakebrewOutputIdentifier = @"+++++Cakebrew+++++";
 			[delegate homebrewInterfaceDidUpdateFormulae];
 		});
 	}
-}
-
-@end
-
-#pragma mark - Homebrew Interface List Calls
-
-@implementation BPHomebrewInterfaceListCall
-
-- (instancetype)initWithArguments:(NSArray *)arguments
-{
-	self = [super init];
-	if (self) {
-		_arguments = arguments;
-	}
-	return self;
-}
-
-- (NSArray *)parseData:(NSString *)data
-{
-	NSMutableArray *array = [[data componentsSeparatedByString:@"\n"] mutableCopy];
-	[array removeLastObject];
-	
-	NSMutableArray *formulae = [NSMutableArray arrayWithCapacity:array.count];
-	
-	for (NSString *item in array) {
-		BPFormula *formula = [self parseFormulaItem:item];
-		if (formula) {
-			[formulae addObject:formula];
-		}
-	}
-	return formulae;
-}
-
-- (BPFormula *)parseFormulaItem:(NSString *)item
-{
-	return [BPFormula formulaWithName:item];
-}
-
-@end
-
-@implementation BPHomebrewInterfaceListCallInstalled
-
-- (instancetype)init
-{
-	return (BPHomebrewInterfaceListCallInstalled *)[super initWithArguments:@[@"list", @"--versions"]];
-}
-
-- (BPFormula *)parseFormulaItem:(NSString *)item
-{
-	NSArray *aux = [item componentsSeparatedByString:@" "];
-	return [BPFormula formulaWithName:[aux firstObject] andVersion:[aux lastObject]];
-}
-
-@end
-
-@implementation BPHomebrewInterfaceListCallAll
-
-- (instancetype)init
-{
-	return (BPHomebrewInterfaceListCallAll *)[super initWithArguments:@[@"search"]];
-}
-
-@end
-
-@implementation BPHomebrewInterfaceListCallLeaves
-
-- (instancetype)init
-{
-	return (BPHomebrewInterfaceListCallLeaves *)[super initWithArguments:@[@"leaves"]];
-}
-
-@end
-
-@implementation BPHomebrewInterfaceListCallUpgradeable
-
-- (instancetype)init
-{
-	return (BPHomebrewInterfaceListCallUpgradeable *)[super initWithArguments:@[@"outdated", @"--verbose"]];
-}
-
-- (BPFormula *)parseFormulaItem:(NSString *)item
-{
-	static NSString *regexString = @"(\\S+)\\s\\((.*)\\)";
-	
-	BPFormula __block *formula = nil;
-	NSError *error = nil;
-	NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern:regexString options:NSRegularExpressionCaseInsensitive error:&error];
-	
-	[regex enumerateMatchesInString:item options:0 range:NSMakeRange(0, [item length]) usingBlock:^(NSTextCheckingResult *result, NSMatchingFlags flags, BOOL *stop) {
-		if (result.resultType == NSTextCheckingTypeRegularExpression)
-		{
-			NSRange lastRange = [result rangeAtIndex:[result numberOfRanges]-1];
-			NSArray *versionsTuple = [[[[item substringWithRange:lastRange] componentsSeparatedByString:@","] lastObject] componentsSeparatedByString:@"<"];
-			formula = [BPFormula formulaWithName:[item substringWithRange:[result rangeAtIndex:1]]
-										 version:[[versionsTuple firstObject] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]]
-								andLatestVersion:[[versionsTuple lastObject] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]]];
-		}
-	}];
-	
-	if (!formula) {
-		formula = [BPFormula formulaWithName:item];
-	}
-	
-	return formula;
-}
-
-@end
-
-@implementation BPHomebrewInterfaceListCallSearch
-
-- (instancetype)initWithSearchParameter:(NSString*)param
-{
-	return (BPHomebrewInterfaceListCallSearch *)[super initWithArguments:@[@"search", param]];
-}
-
-@end
-
-@implementation BPHomebrewInterfaceListCallRepositories
-
-- (instancetype)init
-{
-	return (BPHomebrewInterfaceListCallRepositories *)[super initWithArguments:@[@"tap"]];
 }
 
 @end

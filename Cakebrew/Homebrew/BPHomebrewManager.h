@@ -32,8 +32,10 @@ typedef NS_ENUM(NSInteger, BPFormulaStatus) {
 
 @protocol BPHomebrewManagerDelegate <NSObject>
 
+@required;
 - (void)homebrewManagerFinishedUpdating:(BPHomebrewManager*)manager;
 - (void)homebrewManager:(BPHomebrewManager *)manager didUpdateSearchResults:(NSArray *)searchResults;
+- (void)homebrewManager:(BPHomebrewManager *)manager didUpdateCaskroomAvaliability:(BOOL)available;
 - (void)homebrewManager:(BPHomebrewManager *)manager shouldDisplayNoBrewMessage:(BOOL)yesOrNo;
 
 @end

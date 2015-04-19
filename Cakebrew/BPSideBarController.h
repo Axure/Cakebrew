@@ -35,6 +35,8 @@ typedef NS_ENUM(NSUInteger, FormulaeSideBarItem)
 - (void)refreshSidebarBadges;
 - (void)configureSidebarSettings;
 
+- (void)enableCaskItems;
+
 - (IBAction)selectSideBarRowWithSenderTag:(id)sender;
 
 @end

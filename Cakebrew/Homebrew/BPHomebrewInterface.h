@@ -27,13 +27,14 @@ typedef NS_ENUM(NSInteger, BPListMode) {
     kBPListInstalled,
     kBPListLeaves,
 	kBPListOutdated,
-	kBPListSearch, /* Don't call -[BPHomebrewInterface listMode:] with this parameter. */
+	kBPListSearch, /* Don't call -[BPHomebrewInterface listMode:] with this parameter, it does nothing. */
 	kBPListRepositories
 };
 
 @protocol BPHomebrewInterfaceDelegate <NSObject>
 
 - (void)homebrewInterfaceDidUpdateFormulae;
+- (void)homebrewInterfaceDidUpdateCaskroomStatus;
 - (void)homebrewInterfaceShouldDisplayNoBrewMessage:(BOOL)yesOrNo;
 
 @end
@@ -44,6 +45,8 @@ typedef NS_ENUM(NSInteger, BPListMode) {
 
 @property (strong, nonatomic) NSTask *task; // default nil;
 @property (unsafe_unretained, nonatomic) id<BPHomebrewInterfaceDelegate> delegate;
+
+- (BOOL)isCaskroomInstalled;
 
 #pragma mark - Operations with live data callback block
 
@@ -57,7 +60,8 @@ typedef NS_ENUM(NSInteger, BPListMode) {
 
 #pragma mark - Operations that return on finish
 
-- (NSArray*)listMode:(BPListMode)mode;
+- (NSArray*)listFormulaeMode:(BPListMode)mode;
+- (NSArray*)listCasksMode:(BPListMode)mode;
 - (NSString*)informationForFormula:(NSString*)formula;
 
 @end

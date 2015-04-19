@@ -301,7 +301,7 @@ typedef NS_ENUM(NSUInteger, HomeBrewTab) {
 	}];
 }
 
-#pragma mark – Footer Information Label
+#pragma mark - Footer Information Label
 
 - (void)updateInfoLabelWithSidebarSelection
 {
@@ -397,6 +397,14 @@ typedef NS_ENUM(NSUInteger, HomeBrewTab) {
 	[self.sidebarController.sidebar selectRowIndexes:[NSIndexSet indexSetWithIndex:FormulaeSideBarItemAll] byExtendingSelection:NO];
 	
 	[self configureTableForListing:kBPListSearch];
+}
+
+- (void)homebrewManager:(BPHomebrewManager *)manager didUpdateCaskroomAvaliability:(BOOL)available
+{
+	if (available)
+	{
+		[self.sidebarController enableCaskItems];
+	}
 }
 
 - (void)homebrewManager:(BPHomebrewManager *)manager shouldDisplayNoBrewMessage:(BOOL)yesOrNo

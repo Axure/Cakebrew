@@ -77,6 +77,7 @@
 "Info_View_Formula_No_Conflicts" = "This formula has no known conflicts.";
 
 "Sidebar_Group_Formulae" = "Formulae";
+"Sidebar_Group_CaskRoom" = "Cask Room";
 "Sidebar_Group_Tools" = "Tools";
 
 "Sidebar_Item_Installed" = "Installed";
@@ -86,6 +87,7 @@
 "Sidebar_Item_Repos" = "Repositories";
 "Sidebar_Item_Doctor" = "Doctor";
 "Sidebar_Item_Update" = "Update";
+"Sidebar_Item_All_Casks" = "All Casks";
 
 "Sidebar_VoiceOver_Tools" = "Tools";
 

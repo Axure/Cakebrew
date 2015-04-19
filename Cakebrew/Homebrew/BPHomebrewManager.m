@@ -63,13 +63,13 @@ NSString *const kBP_CACHE_DICT_DATA_KEY = @"BP_CACHE_DICT_DATA_KEY";
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
 		[[BPHomebrewInterface sharedInterface] setDelegate:self];
 		
-        [self setFormulae_installed:[[BPHomebrewInterface sharedInterface] listMode:kBPListInstalled]];
-        [self setFormulae_leaves:[[BPHomebrewInterface sharedInterface] listMode:kBPListLeaves]];
-        [self setFormulae_outdated:[[BPHomebrewInterface sharedInterface] listMode:kBPListOutdated]];
-        [self setFormulae_repositories:[[BPHomebrewInterface sharedInterface] listMode:kBPListRepositories]];
+        [self setFormulae_installed:[[BPHomebrewInterface sharedInterface] listFormulaeMode:kBPListInstalled]];
+        [self setFormulae_leaves:[[BPHomebrewInterface sharedInterface] listFormulaeMode:kBPListLeaves]];
+        [self setFormulae_outdated:[[BPHomebrewInterface sharedInterface] listFormulaeMode:kBPListOutdated]];
+        [self setFormulae_repositories:[[BPHomebrewInterface sharedInterface] listFormulaeMode:kBPListRepositories]];
 
         if (![self loadAllFormulaeCaches] || shouldRebuildCache) {
-			[self setFormulae_all:[[BPHomebrewInterface sharedInterface] listMode:kBPListAll]];
+			[self setFormulae_all:[[BPHomebrewInterface sharedInterface] listFormulaeMode:kBPListAll]];
 			[self storeAllFormulaeCaches];
         }
 		
@@ -179,7 +179,7 @@ NSString *const kBP_CACHE_DICT_DATA_KEY = @"BP_CACHE_DICT_DATA_KEY";
     }
 }
 
-#pragma - Homebrew Interface Delegate
+#pragma mark - Homebrew Interface Delegate
 
 - (void)homebrewInterfaceDidUpdateFormulae
 {
@@ -188,8 +188,17 @@ NSString *const kBP_CACHE_DICT_DATA_KEY = @"BP_CACHE_DICT_DATA_KEY";
 
 - (void)homebrewInterfaceShouldDisplayNoBrewMessage:(BOOL)yesOrNo
 {
-	if (self.delegate) {
+	if (self.delegate)
+	{
 		[self.delegate homebrewManager:self shouldDisplayNoBrewMessage:yesOrNo];
+	}
+}
+
+- (void)homebrewInterfaceDidUpdateCaskroomStatus
+{
+	if (self.delegate)
+	{
+		[self.delegate homebrewManager:self didUpdateCaskroomAvaliability:[[BPHomebrewInterface sharedInterface] isCaskroomInstalled]];
 	}
 }
 
