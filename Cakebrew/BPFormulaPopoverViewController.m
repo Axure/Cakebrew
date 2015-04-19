@@ -37,6 +37,10 @@
 		[self.formulaTextView setString:NSLocalizedString(@"Formula_Popover_Error", nil)];
 	}
 	
+	float OSXVersion = [BPAppDelegateRef OSXVersion];
+	
+	[self.formulaTitleLabel setTextColor:(OSXVersion >= 10.10 ? [NSColor blackColor] : [NSColor whiteColor])];
+	[self.formulaTextView   setTextColor:(OSXVersion >= 10.10 ? [NSColor blackColor] : [NSColor whiteColor])];
 }
 
 - (NSString *)nibName
