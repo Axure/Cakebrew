@@ -127,3 +127,35 @@
 }
 
 @end
+
+#pragma mark - Homebrew Caskroom
+
+@implementation BPHomebrewCasksListCallInstalled
+
+- (instancetype)init
+{
+	return (BPHomebrewCasksListCallInstalled *)[super initWithArguments:@[@"cask", @"list"]];
+}
+
+@end
+
+@implementation BPHomebrewCasksListCallAll
+
+- (instancetype)init
+{
+	return (BPHomebrewCasksListCallAll *)[super initWithArguments:@[@"cask", @"search"]];
+}
+
+@end
+
+@implementation BPHomebrewCasksListCallOutdated
+
+- (instancetype)init
+{
+	return (BPHomebrewCasksListCallOutdated *)[super initWithArguments:@[@"cask", @"??"]];
+}
+
+@end
+
+@implementation BPHomebrewCasksListCallSearch
+@end

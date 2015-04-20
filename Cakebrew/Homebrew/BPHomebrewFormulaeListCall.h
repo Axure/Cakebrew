@@ -37,3 +37,17 @@
 
 @interface BPHomebrewFormulaeListCallRepositories: BPHomebrewFormulaeListCall
 @end
+
+#pragma mark - Homebrew Caskroom
+
+@interface BPHomebrewCasksListCallInstalled : BPHomebrewFormulaeListCall
+@end
+
+@interface BPHomebrewCasksListCallAll : BPHomebrewFormulaeListCall
+@end
+
+@interface BPHomebrewCasksListCallOutdated : BPHomebrewFormulaeListCall
+@end
+
+@interface BPHomebrewCasksListCallSearch : BPHomebrewFormulaeListCall
+@end
